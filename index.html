@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1e2e">
 <title>Doing Stuff Planner</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
   --hot: #E8195A;
@@ -19,456 +18,279 @@
   --dark2: #2c2f42;
   --text: #1a1e2e;
   --muted: #8b8fa8;
-  --border: #e8dde8;
+  --border: #e4dcea;
   --bg: #f7f5f9;
   --card: #ffffff;
-  --shadow: 0 2px 20px rgba(232,25,90,0.07);
   --radius: 14px;
-  --sidebar-w: 220px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100%; }
 
-html, body { height: 100%; }
+/* ══════════════════════════════════════════
+   MOBILE-FIRST LAYOUT
+   Sidebar hidden by default, shown on desktop
+══════════════════════════════════════════ */
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  overflow: hidden;
+.sidebar { display: none; }
+
+.main {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: calc(72px + var(--safe-b));
 }
 
-/* ─── MOBILE BOTTOM NAV ─────────────────────────────────────── */
-@media (max-width: 700px) {
-  body { flex-direction: column; }
-  .sidebar { display: none; }
-  .main { margin-left: 0 !important; padding-bottom: calc(64px + var(--safe-bottom)); }
-  .bottom-nav {
-    display: flex !important;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--dark);
-    z-index: 200;
-    padding-bottom: var(--safe-bottom);
-    box-shadow: 0 -2px 20px rgba(0,0,0,0.3);
-  }
-  .page-header { padding: 18px 18px 12px; }
-  .content { padding: 16px 16px 40px; }
-  .commitment-grid, .priority-grid, .friend-folder-grid { grid-template-columns: 1fr !important; }
-}
-
-/* ─── BOTTOM NAV (mobile only) ──────────────────────────────── */
+/* ── BOTTOM NAV (always visible on mobile) ── */
 .bottom-nav {
-  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--dark);
+  display: flex;
+  z-index: 300;
+  padding-bottom: var(--safe-b);
+  box-shadow: 0 -1px 0 rgba(255,255,255,0.06), 0 -4px 24px rgba(0,0,0,0.4);
 }
 .bnav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 4px;
-  cursor: pointer;
-  color: rgba(255,255,255,0.4);
-  font-size: 10px;
-  font-weight: 600;
-  gap: 3px;
-  border: none;
-  background: none;
-  transition: color 0.15s;
-  font-family: 'DM Sans', sans-serif;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 2px 8px; cursor: pointer;
+  color: rgba(255,255,255,0.38); font-size: 10px; font-weight: 600;
+  gap: 4px; border: none; background: none;
+  font-family: 'DM Sans', sans-serif; transition: color 0.15s;
+  min-width: 0;
 }
-.bnav-item .bicon { font-size: 20px; line-height: 1; }
+.bnav-item .bi { font-size: 22px; line-height: 1; }
 .bnav-item.active { color: var(--hot); }
-.bnav-more {
+
+/* More drawer */
+.more-drawer {
   position: fixed;
-  bottom: calc(64px + var(--safe-bottom));
+  bottom: calc(56px + var(--safe-b));
   left: 0; right: 0;
   background: var(--dark2);
   display: none;
   flex-wrap: wrap;
-  padding: 12px;
-  gap: 8px;
-  z-index: 199;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 12px;
+  gap: 10px;
+  z-index: 299;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px 16px 0 0;
 }
-.bnav-more.open { display: flex; }
-.bnav-more-item {
-  flex: 1 0 calc(33% - 8px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
-  border-radius: 10px;
-  cursor: pointer;
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.7);
-  font-size: 11px;
-  font-weight: 600;
-  border: none;
-  font-family: 'DM Sans', sans-serif;
+.more-drawer.open { display: flex; }
+.more-item {
+  flex: 1 0 calc(33.33% - 10px);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px; padding: 14px 8px;
+  border-radius: 12px; cursor: pointer;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.65); font-size: 11px; font-weight: 600;
+  border: none; font-family: 'DM Sans', sans-serif;
 }
-.bnav-more-item .bicon { font-size: 20px; }
-.bnav-more-item.active { background: rgba(232,25,90,0.18); color: var(--hot); }
+.more-item .bi { font-size: 22px; }
+.more-item.active { background: rgba(232,25,90,0.2); color: var(--hot); }
 
-/* ─── SIDEBAR ────────────────────────────────────────────────── */
-.sidebar {
-  width: var(--sidebar-w);
-  min-height: 100vh;
-  background: var(--dark);
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  z-index: 100;
-  overflow-y: auto;
-  padding: 24px 0 20px;
+/* overlay to close more drawer */
+.drawer-overlay { display:none; position:fixed; inset:0; z-index:298; }
+.drawer-overlay.open { display:block; }
+
+/* ══════════════════════════════════════════
+   DESKTOP LAYOUT (≥ 768px)
+══════════════════════════════════════════ */
+@media (min-width: 768px) {
+  body { display: flex; overflow: hidden; height: 100vh; }
+
+  .sidebar {
+    display: flex; flex-direction: column;
+    width: 220px; min-height: 100vh;
+    background: var(--dark);
+    position: fixed; top: 0; left: 0; bottom: 0;
+    z-index: 100; overflow-y: auto; padding: 24px 0 20px;
+    flex-shrink: 0;
+  }
+
+  .main {
+    margin-left: 220px;
+    height: 100vh;
+    overflow-y: auto;
+    padding-bottom: 60px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .bottom-nav { display: none; }
+  .more-drawer { display: none !important; }
+  .drawer-overlay { display: none !important; }
 }
-.sidebar-logo {
-  padding: 0 20px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.sidebar-logo .logo-tag {
-  font-family: 'Syne', sans-serif;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2px; color: var(--hot);
-  text-transform: uppercase; margin-bottom: 4px;
-}
-.sidebar-logo h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2;
-}
+
+/* ── SIDEBAR INTERNALS ── */
+.sidebar-logo { padding: 0 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.logo-tag { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--hot); text-transform: uppercase; margin-bottom: 4px; }
+.sidebar-logo h1 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: #fff; line-height: 1.2; }
 .sidebar-logo h1 span { color: var(--hot); }
-
 .nav-section { padding: 14px 0 4px; }
-.nav-label {
-  font-size: 9px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(255,255,255,0.3);
-  padding: 0 20px; margin-bottom: 4px;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 20px; cursor: pointer;
-  color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500;
-  transition: all 0.15s; border-left: 3px solid transparent;
-}
+.nav-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 0 20px; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer; color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
 .nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
 .nav-item.active { color: #fff; border-left-color: var(--hot); background: rgba(232,25,90,0.1); }
-.nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
-
-/* Sync status in sidebar */
-.sync-status {
-  margin: auto 0 0;
-  padding: 14px 16px;
-  border-top: 1px solid rgba(255,255,255,0.07);
-}
+.nav-item .ico { font-size: 15px; width: 18px; text-align: center; }
+.sidebar-bottom { margin-top: auto; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.07); }
 .sync-btn {
-  width: 100%;
-  background: rgba(232,25,90,0.15);
-  border: 1px solid rgba(232,25,90,0.3);
-  border-radius: 10px;
-  color: var(--hot);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 600;
-  padding: 9px 12px;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 8px;
-  transition: background 0.15s;
+  width: 100%; background: rgba(232,25,90,0.12); border: 1px solid rgba(232,25,90,0.28);
+  border-radius: 10px; color: var(--hot); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600; padding: 9px 12px; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: background 0.15s;
 }
-.sync-btn:hover { background: rgba(232,25,90,0.25); }
-.sync-btn .sync-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--muted); flex-shrink: 0;
-  transition: background 0.3s;
-}
-.sync-btn .sync-dot.connected { background: #4ade80; }
-.sync-btn .sync-dot.syncing { background: #facc15; animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.sync-label { flex: 1; text-align: left; }
+.sync-btn:hover { background: rgba(232,25,90,0.22); }
+.sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background 0.3s; }
+.sdot.ok { background: #4ade80; }
+.sdot.busy { background: #facc15; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+#sync-time { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 5px; text-align: center; }
 
-/* ─── MAIN ───────────────────────────────────────────────────── */
-.main {
-  margin-left: var(--sidebar-w);
-  flex: 1;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
+/* ══════════════════════════════════════════
+   PAGES
+══════════════════════════════════════════ */
 .page { display: none; }
 .page.active { display: block; }
 
 .page-header {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 24px 32px 18px;
-  position: sticky; top: 0; z-index: 50;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 20px 18px 14px; position: sticky; top: 0; z-index: 50;
 }
-.page-header .badge {
-  display: inline-block;
-  background: var(--hot-bg); color: var(--hot);
-  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px;
-}
-.page-header h2 {
-  font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
-}
+@media (min-width: 768px) { .page-header { padding: 24px 32px 18px; } }
+.badge { display: inline-block; background: var(--hot-bg); color: var(--hot); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px; }
+.page-header h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+@media (min-width: 768px) { .page-header h2 { font-size: 26px; } }
 .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
-.content { padding: 24px 32px 60px; }
+.content { padding: 16px 18px 40px; }
+@media (min-width: 768px) { .content { padding: 24px 32px 60px; } }
 
-/* ─── CARDS ──────────────────────────────────────────────────── */
-.card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px 22px;
-  box-shadow: var(--shadow); margin-bottom: 16px;
-}
-.card-title {
-  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
-  color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
-}
+/* ══════════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════════ */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom: 14px; }
+.card-title { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
 
-/* ─── COMMITMENTS ────────────────────────────────────────────── */
-.commitment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.commitment-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px 18px 18px; position: relative;
-  transition: box-shadow 0.2s;
-}
-.commitment-card:hover { box-shadow: 0 4px 24px rgba(232,25,90,0.1); }
-.commitment-card .c-num {
-  position: absolute; top: -10px; left: 14px;
-  background: var(--hot); color: #fff;
-  font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 800;
-  padding: 2px 10px; border-radius: 20px;
-}
-.field-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-.field-label { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; min-width: 72px; }
-.field-input {
-  border: none; border-bottom: 1.5px solid var(--border); background: transparent;
-  flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
-  padding: 3px 0; outline: none; min-width: 80px; transition: border-color 0.2s;
-}
-.field-input:focus { border-bottom-color: var(--hot); }
-.field-input::placeholder { color: #ccc; }
+/* Commitments */
+.commit-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 768px) { .commit-grid { grid-template-columns: 1fr 1fr; } }
+.commit-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px 16px; position: relative; }
+.c-num { position: absolute; top: -10px; left: 14px; background: var(--hot); color: #fff; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 20px; }
+.field-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.fl { font-size: 12px; font-weight: 700; white-space: nowrap; min-width: 68px; }
+.fi { border: none; border-bottom: 1.5px solid var(--border); background: transparent; flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); padding: 4px 0; outline: none; min-width: 0; transition: border-color .2s; }
+.fi:focus { border-bottom-color: var(--hot); }
+.fi::placeholder { color: #ccc; }
 
-/* ─── TASK LISTS ─────────────────────────────────────────────── */
+/* Task lists */
 .task-list { list-style: none; }
-.task-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 0; border-bottom: 1px solid var(--border);
-}
+.task-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .task-item:last-child { border-bottom: none; }
-.task-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--hot); cursor: pointer; flex-shrink: 0; }
-.task-item .task-text {
-  flex: 1; border: none; background: transparent;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); outline: none;
-  min-width: 0;
-}
-.task-item .task-text.done { text-decoration: line-through; color: var(--muted); }
-.task-item .del-btn { background: none; border: none; cursor: pointer; color: #ddd; font-size: 18px; padding: 2px 6px; }
-.task-item .del-btn:hover { color: var(--hot); }
+.task-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--hot); cursor: pointer; flex-shrink: 0; }
+.task-text { flex: 1; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text); outline: none; min-width: 0; padding: 2px 0; }
+.task-text.done { text-decoration: line-through; color: var(--muted); }
+.del-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 20px; padding: 4px; line-height: 1; }
+.del-btn:hover { color: var(--hot); }
 
-.add-btn {
-  display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
-  background: var(--hot-bg); color: var(--hot); border: none; border-radius: 8px;
-  padding: 8px 16px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: background 0.15s;
-}
-.add-btn:hover { background: #f9d4e0; }
+.add-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; background: var(--hot-bg); color: var(--hot); border: none; border-radius: 8px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; }
 
-/* ─── PRIORITY ───────────────────────────────────────────────── */
-.priority-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-.priority-box { border-radius: var(--radius); border: 1.5px solid var(--border); padding: 16px; }
-.priority-box.today { border-color: var(--hot); }
-.priority-box.soon { border-color: #f0a030; }
-.priority-box.eventually { border-color: #6ab0f5; }
-.priority-header { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-.today .priority-header { color: var(--hot); }
-.soon .priority-header { color: #f0a030; }
-.eventually .priority-header { color: #6ab0f5; }
+/* Priority */
+.pri-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 768px) { .pri-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.pri-box { border-radius: var(--radius); border: 1.5px solid var(--border); padding: 16px; }
+.pri-box.today { border-color: var(--hot); }
+.pri-box.soon { border-color: #f0a030; }
+.pri-box.eventually { border-color: #6ab0f5; }
+.pri-head { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.today .pri-head { color: var(--hot); }
+.soon .pri-head { color: #f0a030; }
+.eventually .pri-head { color: #6ab0f5; }
 
-/* ─── CALENDAR ───────────────────────────────────────────────── */
-.month-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-.month-nav select {
-  font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; color: var(--text);
-  border: none; background: transparent; cursor: pointer; outline: none; appearance: none;
-}
-.month-nav input[type="number"] {
-  font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 400; color: var(--muted);
-  border: none; border-bottom: 1.5px solid var(--border); background: transparent;
-  width: 58px; outline: none; text-align: center;
-}
-.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
-.cal-header { text-align: center; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; padding: 6px 0; }
-.cal-day {
-  min-height: 72px; border: 1px solid var(--border); border-radius: 8px;
-  padding: 5px 6px; cursor: pointer; transition: border-color 0.15s; position: relative;
-}
-.cal-day:hover { border-color: var(--hot-light); }
-.cal-day.empty { background: rgba(0,0,0,0.02); opacity: 0.4; cursor: default; }
-.cal-day.today-day { border-color: var(--hot); background: var(--hot-bg); }
-.cal-day .day-num {
-  font-size: 11px; font-weight: 700; color: var(--hot);
-  width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 50%; margin-bottom: 3px;
-}
-.cal-day.today-day .day-num { background: var(--hot); color: #fff; }
-.day-note {
-  font-size: 10px; color: var(--text); width: 100%;
-  border: none; background: transparent; outline: none;
-  font-family: 'DM Sans', sans-serif; resize: none; line-height: 1.4;
-}
+/* Calendar */
+.month-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.month-nav select { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: var(--text); border: none; background: transparent; outline: none; cursor: pointer; max-width: 130px; }
+.month-nav input[type=number] { font-family: 'Syne', sans-serif; font-size: 16px; color: var(--muted); border: none; border-bottom: 1.5px solid var(--border); background: transparent; width: 56px; outline: none; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cal-hdr { text-align: center; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; padding: 6px 0; }
+.cal-day { min-height: 60px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 5px; cursor: pointer; }
+@media (min-width: 500px) { .cal-day { min-height: 76px; } }
+.cal-day.empty { background: rgba(0,0,0,0.02); opacity: .4; cursor: default; }
+.cal-day.td { border-color: var(--hot); background: var(--hot-bg); }
+.day-num { font-size: 11px; font-weight: 700; color: var(--hot); display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; margin-bottom: 2px; }
+.cal-day.td .day-num { background: var(--hot); color: #fff; }
+.day-note { font-size: 10px; color: var(--text); width: 100%; border: none; background: transparent; outline: none; font-family: 'DM Sans', sans-serif; resize: none; line-height: 1.4; }
 
-/* ─── WEEKLY ─────────────────────────────────────────────────── */
-.week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.week-nav-btn {
-  background: var(--hot-bg); color: var(--hot); border: none;
-  padding: 7px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px;
-}
-.week-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.week-grid {
-  display: grid; grid-template-columns: 52px repeat(7,minmax(90px,1fr));
-  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
-  min-width: 700px;
-}
-.week-col-header {
-  background: var(--dark); color: rgba(255,255,255,0.85);
-  font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  padding: 9px 6px; text-align: center; border-right: 1px solid rgba(255,255,255,0.06);
-}
-.week-col-header.time-col { background: var(--dark2); }
-.week-time-cell {
-  background: #f7f7f9; border-right: 1px solid var(--border); border-top: 1px solid var(--border);
-  padding: 3px 6px; font-size: 9px; font-weight: 700; color: var(--hot); text-align: right;
-}
-.week-cell { border-right: 1px solid var(--border); border-top: 1px solid var(--border); min-height: 32px; }
-.week-cell textarea {
-  width: 100%; height: 100%; min-height: 32px;
-  border: none; background: transparent; font-family: 'DM Sans', sans-serif;
-  font-size: 10px; color: var(--text); padding: 3px 5px; resize: none; outline: none;
-}
-.week-cell textarea:focus { background: var(--hot-bg); }
+/* Weekly */
+.week-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.w-btn { background: var(--hot-bg); color: var(--hot); border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px; }
+.week-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); }
+.week-grid { display: grid; grid-template-columns: 48px repeat(7,minmax(80px,1fr)); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; min-width: 620px; }
+.wh { background: var(--dark); color: rgba(255,255,255,.8); font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 9px 5px; text-align: center; border-right: 1px solid rgba(255,255,255,.06); }
+.wh.tc { background: var(--dark2); }
+.wt { background: #f5f3f7; border-right: 1px solid var(--border); border-top: 1px solid var(--border); padding: 3px 5px; font-size: 9px; font-weight: 700; color: var(--hot); text-align: right; }
+.wc { border-right: 1px solid var(--border); border-top: 1px solid var(--border); min-height: 34px; }
+.wc textarea { width: 100%; height: 100%; min-height: 34px; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text); padding: 3px 4px; resize: none; outline: none; }
+.wc textarea:focus { background: var(--hot-bg); }
 
-/* ─── HABITS ─────────────────────────────────────────────────── */
+/* Habits */
 .habit-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.habit-table { border-collapse: collapse; min-width: 700px; width: 100%; }
-.habit-table th {
-  font-size: 10px; font-weight: 700; color: var(--muted);
-  padding: 4px 6px; text-align: center; white-space: nowrap;
-}
-.habit-table td { padding: 4px 3px; }
-.habit-name-input {
-  width: 140px; border: none; border-bottom: 1.5px solid var(--border);
-  background: transparent; font-family: 'DM Sans', sans-serif;
-  font-size: 13px; color: var(--text); outline: none; padding: 3px 0;
-}
-.habit-name-input:focus { border-bottom-color: var(--hot); }
-.habit-check {
-  width: 24px; height: 24px; border-radius: 5px; border: 1.5px solid var(--border);
-  cursor: pointer; background: transparent; transition: all 0.15s;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 11px;
-}
-.habit-check.on { background: var(--hot); border-color: var(--hot); color: #fff; }
+.habit-tbl { border-collapse: collapse; min-width: 680px; width: 100%; }
+.habit-tbl th { font-size: 10px; font-weight: 700; color: var(--muted); padding: 4px 4px; text-align: center; }
+.habit-tbl td { padding: 4px 3px; }
+.h-name { width: 130px; border: none; border-bottom: 1.5px solid var(--border); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); outline: none; padding: 3px 0; }
+.h-name:focus { border-bottom-color: var(--hot); }
+.hbox { width: 24px; height: 24px; border-radius: 5px; border: 1.5px solid var(--border); cursor: pointer; background: transparent; transition: all .15s; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+.hbox.on { background: var(--hot); border-color: var(--hot); color: #fff; }
 
-/* ─── FRIEND FILES ───────────────────────────────────────────── */
-.friend-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.friend-tab {
-  padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
-  background: var(--card); font-size: 13px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; font-weight: 500; transition: all 0.15s; color: var(--text);
-}
-.friend-tab.active { background: var(--hot); border-color: var(--hot); color: #fff; }
-.friend-add-tab {
-  padding: 6px 14px; border-radius: 20px; border: 1.5px dashed var(--border);
-  background: transparent; font-size: 13px; cursor: pointer;
-  font-family: 'DM Sans', sans-serif; color: var(--muted); transition: all 0.15s;
-}
-.friend-add-tab:hover { border-color: var(--hot); color: var(--hot); }
-
-.friend-folder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.folder-card { border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.folder-tab-top {
-  background: var(--hot-bg); border-bottom: 1.5px solid var(--hot-light);
-  padding: 7px 12px; font-family: 'Syne', sans-serif; font-size: 10px;
-  font-weight: 700; color: var(--hot); text-transform: uppercase; letter-spacing: 0.5px;
-}
-.folder-body { padding: 10px; min-height: 80px; }
-.folder-body textarea {
-  width: 100%; min-height: 72px; border: none; background: transparent;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text);
-  resize: none; outline: none; line-height: 1.6;
-}
+/* Friends */
+.f-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.f-tab { padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; color: var(--text); }
+.f-tab.active { background: var(--hot); border-color: var(--hot); color: #fff; }
+.f-add { padding: 7px 14px; border-radius: 20px; border: 1.5px dashed var(--border); background: transparent; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--muted); }
+.folder-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+@media (min-width: 500px) { .folder-grid { grid-template-columns: 1fr 1fr; } }
+.folder { border: 1.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.folder-top { background: var(--hot-bg); border-bottom: 1.5px solid var(--hot-light); padding: 7px 12px; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; color: var(--hot); text-transform: uppercase; letter-spacing: .5px; }
+.folder-body { padding: 10px; }
+.folder-body textarea { width: 100%; min-height: 72px; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); resize: none; outline: none; line-height: 1.6; }
 .folder-body textarea::placeholder { color: #ccc; }
 
-/* ─── FREE NOTES ─────────────────────────────────────────────── */
-.notes-editor {
-  min-height: 500px; font-family: 'DM Sans', sans-serif; font-size: 15px;
-  line-height: 1.8; color: var(--text); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 20px 24px; outline: none;
-  resize: none; width: 100%; background: var(--card);
-}
-.notes-editor:focus { border-color: var(--hot-light); }
-.notes-editor::placeholder { color: #ddd; }
+/* Notes */
+.notes-ta { min-height: 60vh; font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.8; color: var(--text); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 18px; outline: none; resize: none; width: 100%; background: var(--card); }
+.notes-ta:focus { border-color: var(--hot-light); }
+.notes-ta::placeholder { color: #ddd; }
 
-/* ─── DASHBOARD ──────────────────────────────────────────────── */
-.dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-@media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr 1fr; } }
-.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; text-align: center; }
-.stat-num { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; color: var(--hot); line-height: 1; }
-.stat-label { font-size: 11px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+/* Dashboard */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-n { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--hot); line-height: 1; }
+.stat-l { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
 
-/* ─── SYNC OVERLAY ───────────────────────────────────────────── */
-.sync-overlay {
-  position: fixed; inset: 0; background: rgba(26,30,46,0.85);
-  display: flex; align-items: center; justify-content: center; z-index: 500;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
+/* Sync modal */
+.sync-overlay { position: fixed; inset: 0; background: rgba(26,30,46,.88); display: flex; align-items: center; justify-content: center; z-index: 500; opacity: 0; pointer-events: none; transition: opacity .3s; }
 .sync-overlay.show { opacity: 1; pointer-events: all; }
-.sync-modal {
-  background: var(--card); border-radius: 20px; padding: 36px;
-  max-width: 440px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.sync-modal h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 10px; }
-.sync-modal p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
-.google-btn {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  width: 100%; padding: 14px; border-radius: 12px;
-  border: 1.5px solid var(--border); background: #fff;
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: box-shadow 0.2s; color: var(--text); margin-bottom: 12px;
-}
-.google-btn:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
-.google-icon { width: 20px; height: 20px; }
-.skip-btn {
-  background: none; border: none; color: var(--muted); font-size: 13px;
-  cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: underline; margin-top: 6px;
-}
+.sync-modal { background: var(--card); border-radius: 20px; padding: 32px 28px; max-width: 420px; width: 92%; text-align: center; }
+.sync-modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.sync-modal p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+.g-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 13px; border-radius: 12px; border: 1.5px solid var(--border); background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; color: var(--text); margin-bottom: 10px; }
+.skip { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: underline; margin-top: 4px; }
 
-/* ─── TOAST ──────────────────────────────────────────────────── */
-.toast {
-  position: fixed; bottom: calc(70px + var(--safe-bottom)); right: 20px;
-  background: var(--dark); color: #fff; padding: 10px 16px;
-  border-radius: 10px; font-size: 12px; font-weight: 500;
-  opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999;
-}
-@media (min-width: 701px) { .toast { bottom: 20px; } }
+/* Toast */
+.toast { position: fixed; bottom: calc(74px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 500; white-space: nowrap; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 999; }
+@media (min-width: 768px) { .toast { bottom: 24px; left: auto; right: 24px; transform: none; border-radius: 10px; } }
 .toast.show { opacity: 1; }
 
-/* ─── SCROLLBARS ─────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* Quick add */
+.quick-row { display: flex; gap: 10px; align-items: center; }
+.quick-inp { flex: 1; border: none; border-bottom: 1.5px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; padding: 8px 0; background: transparent; color: var(--text); min-width: 0; }
+.quick-inp:focus { border-bottom-color: var(--hot); }
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR (desktop) -->
+<!-- SIDEBAR (desktop only, shown via CSS) -->
 <nav class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-tag">HG</div>
@@ -476,66 +298,60 @@ body {
   </div>
   <div class="nav-section">
     <div class="nav-label">Start Here</div>
-    <div class="nav-item active" onclick="goto('dashboard')"><span class="icon">🏠</span> Dashboard</div>
+    <div class="nav-item active" onclick="goto('dashboard')"><span class="ico">🏠</span>Dashboard</div>
   </div>
   <div class="nav-section">
     <div class="nav-label">Sort</div>
-    <div class="nav-item" onclick="goto('commitments')"><span class="icon">🎯</span> Commitments</div>
-    <div class="nav-item" onclick="goto('braindump')"><span class="icon">🧠</span> Brain Dump</div>
-    <div class="nav-item" onclick="goto('thingstodo')"><span class="icon">✅</span> Things To Do</div>
+    <div class="nav-item" onclick="goto('commitments')"><span class="ico">🎯</span>Commitments</div>
+    <div class="nav-item" onclick="goto('braindump')"><span class="ico">🧠</span>Brain Dump</div>
+    <div class="nav-item" onclick="goto('thingstodo')"><span class="ico">✅</span>Things To Do</div>
   </div>
   <div class="nav-section">
     <div class="nav-label">Schedule</div>
-    <div class="nav-item" onclick="goto('monthly')"><span class="icon">📅</span> Monthly</div>
-    <div class="nav-item" onclick="goto('weekly')"><span class="icon">🗓</span> Weekly</div>
-    <div class="nav-item" onclick="goto('habits')"><span class="icon">🔥</span> Habits</div>
+    <div class="nav-item" onclick="goto('monthly')"><span class="ico">📅</span>Monthly</div>
+    <div class="nav-item" onclick="goto('weekly')"><span class="ico">🗓</span>Weekly</div>
+    <div class="nav-item" onclick="goto('habits')"><span class="ico">🔥</span>Habits</div>
   </div>
   <div class="nav-section">
     <div class="nav-label">Sustain</div>
-    <div class="nav-item" onclick="goto('friends')"><span class="icon">👥</span> Friend Files</div>
-    <div class="nav-item" onclick="goto('notes')"><span class="icon">📓</span> Free Notes</div>
+    <div class="nav-item" onclick="goto('friends')"><span class="ico">👥</span>Friend Files</div>
+    <div class="nav-item" onclick="goto('notes')"><span class="ico">📓</span>Free Notes</div>
   </div>
-  <div class="sync-status">
-    <button class="sync-btn" onclick="handleSyncBtn()" id="sync-btn">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span class="sync-label" id="sync-label">Connect Google Drive</span>
+  <div class="sidebar-bottom">
+    <button class="sync-btn" onclick="handleSync()" id="sync-btn">
+      <div class="sdot" id="sdot"></div>
+      <span id="slabel">Connect Google Drive</span>
     </button>
-    <div id="sync-info" style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;text-align:center;"></div>
+    <div id="sync-time"></div>
   </div>
 </nav>
 
-<!-- MAIN -->
-<div class="main" id="main-scroll">
+<!-- MAIN CONTENT -->
+<div class="main" id="main">
 
   <!-- DASHBOARD -->
   <div id="page-dashboard" class="page active">
-    <div class="page-header">
-      <div class="badge">Dashboard</div>
-      <h2>Welcome Back</h2>
-      <p>Your planner — synced across all your devices.</p>
-    </div>
+    <div class="page-header"><div class="badge">Start Here</div><h2>Welcome Back</h2><p>Your planner — synced across all devices.</p></div>
     <div class="content">
       <div class="dash-grid">
-        <div class="stat-card"><div class="stat-num" id="stat-c">0</div><div class="stat-label">Commitments</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-t">0</div><div class="stat-label">Tasks in Brain Dump</div></div>
-        <div class="stat-card"><div class="stat-num" id="stat-d">0</div><div class="stat-label">Done Today</div></div>
+        <div class="stat-card"><div class="stat-n" id="sc">0</div><div class="stat-l">Commitments</div></div>
+        <div class="stat-card"><div class="stat-n" id="st">0</div><div class="stat-l">Tasks</div></div>
+        <div class="stat-card"><div class="stat-n" id="sd">0</div><div class="stat-l">Done</div></div>
       </div>
       <div class="card" style="border-left:4px solid var(--hot)">
         <div class="card-title">Quick Add Task</div>
-        <div style="display:flex;gap:10px;align-items:center">
-          <input id="quick-inp" type="text" placeholder="Type a task and press Enter…"
-            style="flex:1;border:none;border-bottom:1.5px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;padding:6px 0;background:transparent"
-            onkeydown="if(event.key==='Enter')quickAdd()">
-          <button class="add-btn" style="margin-top:0" onclick="quickAdd()">Add</button>
+        <div class="quick-row">
+          <input class="quick-inp" id="qi" type="text" placeholder="Aufgabe eingeben und Enter drücken…" onkeydown="if(event.key==='Enter')quickAdd()">
+          <button class="add-btn" style="margin-top:0;padding:10px 14px" onclick="quickAdd()">＋</button>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">How It Works</div>
+        <div class="card-title">So funktioniert es</div>
         <p style="font-size:14px;line-height:1.8;color:#555">
-          <strong>SORT</strong> — Pick 1–3 commitments, break them into tasks, sort by urgency.<br>
-          <strong>SCHEDULE</strong> — Map tasks to your month, week, or habit tracker.<br>
-          <strong>SUSTAIN</strong> — Keep friend notes and free-form writing here.<br><br>
-          <strong style="color:var(--hot)">✦ Sync</strong> — Your data saves to Google Drive automatically. Open this file on any device — Pixel 6a, MacBook, anywhere — and it's always up to date.
+          <strong>SORT</strong> — Wähle 1–3 Commitments, zerlege sie in Aufgaben, sortiere nach Dringlichkeit.<br>
+          <strong>SCHEDULE</strong> — Plane im Monats- oder Wochenkalender, tracke Gewohnheiten.<br>
+          <strong>SUSTAIN</strong> — Freunde-Notizen und freies Schreiben.<br>
+          <strong style="color:var(--hot)">☁️ Sync</strong> — Verbinde Google Drive für automatische Synchronisation.
         </p>
       </div>
     </div>
@@ -543,48 +359,43 @@ body {
 
   <!-- COMMITMENTS -->
   <div id="page-commitments" class="page">
-    <div class="page-header"><div class="badge">Sort</div><h2>Commitments</h2><p>Choose 1–3 things you're committing to right now.</p></div>
+    <div class="page-header"><div class="badge">Sort</div><h2>Commitments</h2><p>Wähle 1–3 Dinge, auf die du dich jetzt konzentrierst.</p></div>
     <div class="content">
-      <div class="commitment-grid" id="commitment-grid"></div>
-      <button class="add-btn" onclick="addCommitment()">＋ Add Commitment</button>
+      <div class="commit-grid" id="commit-grid"></div>
+      <button class="add-btn" onclick="addCommit()">＋ Commitment hinzufügen</button>
     </div>
   </div>
 
   <!-- BRAIN DUMP -->
   <div id="page-braindump" class="page">
-    <div class="page-header"><div class="badge">Sort</div><h2>Brain Dump</h2><p>List everything — big or small. Get it out of your head.</p></div>
+    <div class="page-header"><div class="badge">Sort</div><h2>Brain Dump</h2><p>Liste alles auf — groß oder klein. Raus aus dem Kopf.</p></div>
     <div class="content">
       <div class="card">
         <ul class="task-list" id="brain-list"></ul>
-        <button class="add-btn" onclick="addBrain()">＋ Add Task</button>
+        <button class="add-btn" onclick="addBrain()">＋ Aufgabe hinzufügen</button>
       </div>
     </div>
   </div>
 
   <!-- THINGS TO DO -->
   <div id="page-thingstodo" class="page">
-    <div class="page-header"><div class="badge">Sort</div><h2>Things To Do</h2><p>Sort by urgency. Focus on Today first.</p></div>
+    <div class="page-header"><div class="badge">Sort</div><h2>Things To Do</h2><p>Sortiere nach Dringlichkeit. Fang mit Heute an.</p></div>
     <div class="content">
-      <div class="priority-grid">
-        <div class="priority-box today"><div class="priority-header">⚡ Today</div><ul class="task-list" id="list-today"></ul><button class="add-btn" onclick="addPri('today')" style="margin-top:8px">＋</button></div>
-        <div class="priority-box soon"><div class="priority-header">📌 Soon</div><ul class="task-list" id="list-soon"></ul><button class="add-btn" onclick="addPri('soon')" style="margin-top:8px;background:#fff4e0;color:#f0a030">＋</button></div>
-        <div class="priority-box eventually"><div class="priority-header">🌊 Eventually</div><ul class="task-list" id="list-eventually"></ul><button class="add-btn" onclick="addPri('eventually')" style="margin-top:8px;background:#e8f0fc;color:#6ab0f5">＋</button></div>
+      <div class="pri-grid">
+        <div class="pri-box today"><div class="pri-head">⚡ Heute</div><ul class="task-list" id="l-today"></ul><button class="add-btn" onclick="addPri('today')" style="margin-top:8px">＋</button></div>
+        <div class="pri-box soon"><div class="pri-head">📌 Bald</div><ul class="task-list" id="l-soon"></ul><button class="add-btn" onclick="addPri('soon')" style="margin-top:8px;background:#fff4e0;color:#f0a030">＋</button></div>
+        <div class="pri-box eventually"><div class="pri-head">🌊 Irgendwann</div><ul class="task-list" id="l-eventually"></ul><button class="add-btn" onclick="addPri('eventually')" style="margin-top:8px;background:#e8f0fc;color:#6ab0f5">＋</button></div>
       </div>
     </div>
   </div>
 
   <!-- MONTHLY -->
   <div id="page-monthly" class="page">
-    <div class="page-header"><div class="badge">Schedule</div><h2>Monthly Calendar</h2><p>Tap any day to add a note.</p></div>
+    <div class="page-header"><div class="badge">Schedule</div><h2>Monatskalender</h2><p>Tippe auf einen Tag um eine Notiz hinzuzufügen.</p></div>
     <div class="content">
       <div class="month-nav">
-        <select id="cal-month" onchange="renderCal()">
-          <option value="0">January</option><option value="1">February</option><option value="2">March</option>
-          <option value="3">April</option><option value="4">May</option><option value="5">June</option>
-          <option value="6">July</option><option value="7">August</option><option value="8">September</option>
-          <option value="9">October</option><option value="10">November</option><option value="11">December</option>
-        </select>
-        <input type="number" id="cal-year" value="2026" onchange="renderCal()" min="2020" max="2050">
+        <select id="cm" onchange="renderCal()"><option value="0">Januar</option><option value="1">Februar</option><option value="2">März</option><option value="3">April</option><option value="4">Mai</option><option value="5">Juni</option><option value="6">Juli</option><option value="7">August</option><option value="8">September</option><option value="9">Oktober</option><option value="10">November</option><option value="11">Dezember</option></select>
+        <input type="number" id="cy" value="2026" onchange="renderCal()" min="2020" max="2050">
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
@@ -592,557 +403,461 @@ body {
 
   <!-- WEEKLY -->
   <div id="page-weekly" class="page">
-    <div class="page-header"><div class="badge">Schedule</div><h2>Weekly Planner</h2><p>Hour-by-hour planning. Scroll horizontally on mobile.</p></div>
+    <div class="page-header"><div class="badge">Schedule</div><h2>Wochenplaner</h2><p>Stundenweise Planung. Horizontal scrollen auf dem Handy.</p></div>
     <div class="content">
       <div class="week-nav">
-        <button class="week-nav-btn" onclick="changeWeek(-1)">◀</button>
-        <span id="week-label" style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px"></span>
-        <button class="week-nav-btn" onclick="changeWeek(1)">▶</button>
+        <button class="w-btn" onclick="chWeek(-1)">◀</button>
+        <span id="wlabel" style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px"></span>
+        <button class="w-btn" onclick="chWeek(1)">▶</button>
       </div>
-      <div class="week-wrap"><div class="week-grid" id="week-grid"></div></div>
+      <div class="week-scroll"><div class="week-grid" id="week-grid"></div></div>
     </div>
   </div>
 
   <!-- HABITS -->
   <div id="page-habits" class="page">
-    <div class="page-header"><div class="badge">Schedule</div><h2>Habit Tracker</h2><p>Track daily habits for up to 31 days.</p></div>
+    <div class="page-header"><div class="badge">Schedule</div><h2>Habit Tracker</h2><p>Bis zu 31 Tage pro Gewohnheit.</p></div>
     <div class="content">
       <div class="card">
         <div class="habit-scroll">
-          <table class="habit-table">
-            <thead><tr id="habit-head"></tr></thead>
-            <tbody id="habit-body"></tbody>
-          </table>
+          <table class="habit-tbl"><thead><tr id="h-head"></tr></thead><tbody id="h-body"></tbody></table>
         </div>
-        <button class="add-btn" onclick="addHabit()">＋ Add Habit</button>
+        <button class="add-btn" onclick="addHabit()">＋ Gewohnheit hinzufügen</button>
       </div>
     </div>
   </div>
 
   <!-- FRIENDS -->
   <div id="page-friends" class="page">
-    <div class="page-header"><div class="badge">Sustain</div><h2>Friend Files</h2><p>Remember the people you care about.</p></div>
+    <div class="page-header"><div class="badge">Sustain</div><h2>Friend Files</h2><p>Erinnere dich an die Menschen, die dir wichtig sind.</p></div>
     <div class="content">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <div class="friend-tabs" id="friend-tabs"></div>
-        <button class="friend-add-tab" onclick="addFriend()">＋ Add Person</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="f-tabs" id="f-tabs"></div>
+        <button class="f-add" onclick="addFriend()">＋ Person</button>
       </div>
-      <div id="friend-content"></div>
+      <div id="f-content"></div>
     </div>
   </div>
 
   <!-- NOTES -->
   <div id="page-notes" class="page">
-    <div class="page-header"><div class="badge">Sustain</div><h2>Free Notes</h2><p>Write anything here.</p></div>
+    <div class="page-header"><div class="badge">Sustain</div><h2>Freie Notizen</h2><p>Schreib alles was du möchtest.</p></div>
     <div class="content">
-      <textarea class="notes-editor" id="free-notes" placeholder="Write anything here…"></textarea>
+      <textarea class="notes-ta" id="free-notes" placeholder="Hier schreiben…"></textarea>
     </div>
   </div>
 
 </div><!-- /main -->
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="bottom-nav" id="bottom-nav">
-  <button class="bnav-item active" onclick="goto('dashboard');setBnav(this)" data-page="dashboard"><span class="bicon">🏠</span>Home</button>
-  <button class="bnav-item" onclick="goto('braindump');setBnav(this)" data-page="braindump"><span class="bicon">🧠</span>Dump</button>
-  <button class="bnav-item" onclick="goto('thingstodo');setBnav(this)" data-page="thingstodo"><span class="bicon">✅</span>ToDo</button>
-  <button class="bnav-item" onclick="goto('monthly');setBnav(this)" data-page="monthly"><span class="bicon">📅</span>Month</button>
-  <button class="bnav-item" onclick="toggleMore()" id="more-btn"><span class="bicon">⋯</span>More</button>
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="bn-dashboard" onclick="goto('dashboard');setbn('dashboard')"><span class="bi">🏠</span>Home</button>
+  <button class="bnav-item" id="bn-braindump" onclick="goto('braindump');setbn('braindump')"><span class="bi">🧠</span>Dump</button>
+  <button class="bnav-item" id="bn-thingstodo" onclick="goto('thingstodo');setbn('thingstodo')"><span class="bi">✅</span>ToDo</button>
+  <button class="bnav-item" id="bn-monthly" onclick="goto('monthly');setbn('monthly')"><span class="bi">📅</span>Monat</button>
+  <button class="bnav-item" id="bn-more" onclick="toggleMore()"><span class="bi">⋯</span>Mehr</button>
 </nav>
-<div class="bnav-more" id="bnav-more">
-  <button class="bnav-more-item" onclick="goto('commitments');toggleMore()"><span class="bicon">🎯</span>Commitments</button>
-  <button class="bnav-more-item" onclick="goto('weekly');toggleMore()"><span class="bicon">🗓</span>Weekly</button>
-  <button class="bnav-more-item" onclick="goto('habits');toggleMore()"><span class="bicon">🔥</span>Habits</button>
-  <button class="bnav-more-item" onclick="goto('friends');toggleMore()"><span class="bicon">👥</span>Friends</button>
-  <button class="bnav-more-item" onclick="goto('notes');toggleMore()"><span class="bicon">📓</span>Notes</button>
-  <button class="bnav-more-item" onclick="handleSyncBtn();toggleMore()"><span class="bicon">☁️</span>Sync</button>
+
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeMore()"></div>
+<div class="more-drawer" id="more-drawer">
+  <button class="more-item" onclick="goto('commitments');setbn('commitments');closeMore()"><span class="bi">🎯</span>Commitments</button>
+  <button class="more-item" onclick="goto('weekly');setbn('weekly');closeMore()"><span class="bi">🗓</span>Woche</button>
+  <button class="more-item" onclick="goto('habits');setbn('habits');closeMore()"><span class="bi">🔥</span>Habits</button>
+  <button class="more-item" onclick="goto('friends');setbn('friends');closeMore()"><span class="bi">👥</span>Freunde</button>
+  <button class="more-item" onclick="goto('notes');setbn('notes');closeMore()"><span class="bi">📓</span>Notizen</button>
+  <button class="more-item" onclick="handleSync();closeMore()"><span class="bi">☁️</span>Sync</button>
 </div>
 
-<!-- GOOGLE DRIVE SYNC OVERLAY -->
+<!-- SYNC MODAL -->
 <div class="sync-overlay" id="sync-overlay">
   <div class="sync-modal">
-    <div style="font-size:42px;margin-bottom:12px">☁️</div>
-    <h3>Sync with Google Drive</h3>
-    <p>Connect once and your planner data stays in sync across your Pixel 6a, MacBook, or any device — automatically.</p>
-    <button class="google-btn" onclick="startGoogleAuth()">
-      <svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Sign in with Google
+    <div style="font-size:40px;margin-bottom:10px">☁️</div>
+    <h3>Google Drive Sync</h3>
+    <p>Verbinde einmal und deine Daten bleiben auf allen Geräten synchron — Pixel 6a, MacBook, überall.</p>
+    <button class="g-btn" onclick="startAuth()">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Mit Google anmelden
     </button>
-    <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px">
-      Your data is saved as a private file in your own Google Drive.<br>No one else can access it.
-    </div>
-    <button class="skip-btn" onclick="closeSyncModal()">Skip for now (local storage only)</button>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5">Deine Daten werden als private Datei in deinem eigenen Google Drive gespeichert.</div>
+    <button class="skip" onclick="closeSyncModal()">Überspringen (nur lokal speichern)</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // GOOGLE DRIVE SYNC
-// Uses Google Identity Services (GIS) + Drive REST API v3
-// Saves data as a JSON file named "doing-stuff-planner-data.json"
-// in the user's own Drive (appDataFolder or root).
-// ════════════════════════════════════════════════════════════
-
-// ── HOW TO SET UP YOUR OWN OAUTH CLIENT ────────────────────
-// 1. Go to https://console.cloud.google.com
-// 2. Create a project → Enable "Google Drive API"
-// 3. OAuth consent screen → External, add your email as test user
-// 4. Credentials → Create OAuth 2.0 Client ID → Web application
-// 5. Authorised JavaScript origins: add the URL where you host this file
-//    (for local: http://localhost or file:// won't work — use a simple
-//     local server, e.g. "npx serve ." then http://localhost:3000)
-// 6. Replace CLIENT_ID below with your client ID.
-//
-// EASIEST SETUP: Host on GitHub Pages (free):
-//   - Create a GitHub repo, upload this file as index.html
-//   - Enable Pages → your URL is https://yourusername.github.io/reponame/
-//   - Add that URL as authorised origin in Google Cloud Console
-// ────────────────────────────────────────────────────────────
-
-const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE'; // ← Replace this
+// ─────────────────────────────────────────
+// Setup: https://console.cloud.google.com
+// 1. Projekt erstellen → Google Drive API aktivieren
+// 2. OAuth 2.0 Client ID erstellen (Web-Anwendung)
+// 3. Autorisierte JS-Ursprünge: https://mikethedang92.github.io
+// 4. CLIENT_ID unten ersetzen
+// ═══════════════════════════════════════════
+const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID_HERE';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
-const FILE_NAME = 'doing-stuff-planner-data.json';
-const FOLDER = 'appDataFolder'; // private, not visible in Drive UI
+const FNAME = 'doing-stuff-planner-data.json';
 
-let tokenClient = null;
-let accessToken = null;
-let driveFileId = null;
-let syncTimer = null;
-let syncPending = false;
+let tokenClient=null, accessToken=null, fileId=null, saveTimer=null;
 
-function initGoogleAuth() {
-  if (!window.google || CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') return;
-  google.accounts.id.initialize({ client_id: CLIENT_ID });
+function initGIS() {
+  if(!window.google || CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID_HERE') return;
   tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: onTokenReceived,
+    client_id: CLIENT_ID, scope: SCOPES, callback: onToken
   });
-  // Try to restore token from session
-  const saved = sessionStorage.getItem('dsp_token');
-  if (saved) { accessToken = saved; setSyncConnected(); findOrCreateFile(); }
+  const t = sessionStorage.getItem('dsp_tok');
+  if(t){ accessToken=t; setConnected(); findFile(); }
 }
 
-function startGoogleAuth() {
-  if (CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
-    showSetupGuide(); return;
+function startAuth() {
+  if(CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID_HERE'){
+    closeSyncModal();
+    alert('Setup:\n1. console.cloud.google.com\n2. Projekt → Drive API aktivieren\n3. OAuth Client ID erstellen\n4. Autorisierter Ursprung: https://mikethedang92.github.io\n5. CLIENT_ID in der Datei ersetzen');
+    return;
   }
   closeSyncModal();
-  tokenClient.requestAccessToken({ prompt: 'consent' });
+  tokenClient.requestAccessToken({prompt:'consent'});
 }
 
-function onTokenReceived(resp) {
-  if (resp.error) { showToast('❌ Google sign-in failed'); return; }
-  accessToken = resp.access_token;
-  sessionStorage.setItem('dsp_token', accessToken);
-  setSyncConnected();
-  findOrCreateFile();
-  showToast('✓ Connected to Google Drive');
+function onToken(r){
+  if(r.error){ toast('❌ Anmeldung fehlgeschlagen'); return; }
+  accessToken=r.access_token;
+  sessionStorage.setItem('dsp_tok', accessToken);
+  setConnected(); findFile(); toast('✓ Mit Google Drive verbunden');
 }
 
-async function findOrCreateFile() {
-  setSyncing();
-  try {
-    const res = await gfetch(`https://www.googleapis.com/drive/v3/files?spaces=${FOLDER}&q=name='${FILE_NAME}'&fields=files(id,name,modifiedTime)`);
-    const data = await res.json();
-    if (data.files && data.files.length > 0) {
-      driveFileId = data.files[0].id;
-      await loadFromDrive();
-    } else {
-      await createDriveFile();
-    }
-  } catch(e) { showToast('⚠️ Drive error: ' + e.message); setSyncIdle(); }
+async function findFile(){
+  setBusy();
+  try{
+    const r=await gf(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${FNAME}'&fields=files(id)`);
+    const d=await r.json();
+    if(d.files&&d.files.length){ fileId=d.files[0].id; await loadFile(); }
+    else { await createFile(); }
+  }catch(e){ toast('⚠️ Drive Fehler'); setConnected(); }
 }
 
-async function createDriveFile() {
-  const meta = { name: FILE_NAME, parents: [FOLDER] };
-  const body = JSON.stringify(state);
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
-  form.append('file', new Blob([body], {type:'application/json'}));
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-    method: 'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form
-  });
-  const data = await res.json();
-  driveFileId = data.id;
-  setSyncIdle();
-  showToast('☁️ Drive file created');
+async function createFile(){
+  const form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify({name:FNAME,parents:['appDataFolder']})],{type:'application/json'}));
+  form.append('file',new Blob([JSON.stringify(state)],{type:'application/json'}));
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
+  const d=await r.json(); fileId=d.id; setConnected(); toast('☁️ Drive-Datei erstellt');
 }
 
-async function loadFromDrive() {
-  const res = await gfetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
-  const remote = await res.json();
-  state = Object.assign(state, remote);
-  rerenderAll();
-  setSyncIdle();
-  updateSyncTime();
-  showToast('☁️ Loaded from Drive');
+async function loadFile(){
+  const r=await gf(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+  const remote=await r.json();
+  state=Object.assign(state,remote);
+  rerenderAll(); setConnected(); updSyncTime(); toast('☁️ Von Drive geladen');
 }
 
-async function saveToDrive() {
-  if (!driveFileId || !accessToken) { localSave(); return; }
-  setSyncing();
-  try {
-    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
-      method: 'PATCH',
-      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify(state)
-    });
-    localSave();
-    setSyncIdle();
-    updateSyncTime();
-  } catch(e) {
-    localSave();
-    showToast('⚠️ Drive save failed — saved locally');
-    setSyncIdle();
-  }
+async function saveToDrive(){
+  if(!fileId||!accessToken){ localSave(); return; }
+  setBusy();
+  try{
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+      {method:'PATCH',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify(state)});
+    localSave(); setConnected(); updSyncTime();
+  }catch(e){ localSave(); setConnected(); toast('⚠️ Drive-Speicherung fehlgeschlagen'); }
 }
 
-function gfetch(url) {
-  return fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
-}
+function gf(url){ return fetch(url,{headers:{Authorization:'Bearer '+accessToken}}); }
 
-// Debounced save — waits 2s after last change
-function scheduleSave() {
+function scheduleSave(){
   localSave();
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => saveToDrive(), 2000);
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveToDrive(),2000);
 }
 
-function localSave() {
-  try { localStorage.setItem('dsp-v3', JSON.stringify(state)); } catch(e) {}
-}
+function localSave(){ try{localStorage.setItem('dsp-v4',JSON.stringify(state));}catch(e){} }
+function localLoad(){ try{const s=localStorage.getItem('dsp-v4');if(s)state=Object.assign(state,JSON.parse(s));}catch(e){} }
 
-function localLoad() {
-  try { const s = localStorage.getItem('dsp-v3'); if (s) state = Object.assign(state, JSON.parse(s)); } catch(e) {}
-}
+function setConnected(){ document.getElementById('sdot').className='sdot ok'; document.getElementById('slabel').textContent='Drive verbunden'; }
+function setBusy(){ document.getElementById('sdot').className='sdot busy'; document.getElementById('slabel').textContent='Synchronisiere…'; }
+function updSyncTime(){ document.getElementById('sync-time').textContent='Zuletzt: '+new Date().toLocaleTimeString('de-DE'); }
+function handleSync(){ if(accessToken){ saveToDrive(); toast('☁️ Synchronisiere…'); } else showSyncModal(); }
+function showSyncModal(){ document.getElementById('sync-overlay').classList.add('show'); }
+function closeSyncModal(){ document.getElementById('sync-overlay').classList.remove('show'); }
 
-// Sync status UI
-function setSyncing() {
-  document.getElementById('sync-dot').className = 'sync-dot syncing';
-  document.getElementById('sync-label').textContent = 'Syncing…';
-}
-function setSyncConnected() {
-  document.getElementById('sync-dot').className = 'sync-dot connected';
-  document.getElementById('sync-label').textContent = 'Drive Connected';
-}
-function setSyncIdle() {
-  if (accessToken) setSyncConnected();
-}
-function updateSyncTime() {
-  document.getElementById('sync-info').textContent = 'Last sync: ' + new Date().toLocaleTimeString();
-}
-
-function handleSyncBtn() {
-  if (accessToken) {
-    if (driveFileId) { saveToDrive(); showToast('☁️ Syncing now…'); }
-  } else {
-    showSyncModal();
-  }
-}
-
-function showSyncModal() { document.getElementById('sync-overlay').classList.add('show'); }
-function closeSyncModal() { document.getElementById('sync-overlay').classList.remove('show'); }
-
-function showSetupGuide() {
-  closeSyncModal();
-  showToast('📋 See setup instructions in the file');
-  alert(`To enable Google Drive sync:\n\n1. Go to https://console.cloud.google.com\n2. Create a project → Enable "Google Drive API"\n3. Create an OAuth 2.0 Client ID (Web application)\n4. Add your hosting URL as Authorised JavaScript Origin\n5. Replace CLIENT_ID in this file with your client ID\n\nEASIEST: Host on GitHub Pages (free)\nThen it works on every device including your Pixel 6a!`);
-}
-
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════════════
-let state = {
-  commitments: [],
-  brainTasks: [],
-  todayTasks: [], soonTasks: [], eventuallyTasks: [],
-  calNotes: {}, weekNotes: {},
-  habits: [],
-  friends: [], currentFriend: 0,
-  weekOffset: 0,
-  freeNotes: ''
+// ═══════════════════════════════════════════
+let state={
+  commitments:[],
+  brainTasks:[],
+  todayTasks:[],soonTasks:[],eventuallyTasks:[],
+  calNotes:{},weekNotes:{},
+  habits:[],
+  friends:[],currentFriend:0,
+  weekOffset:0,
+  freeNotes:''
 };
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // NAVIGATION
-// ════════════════════════════════════════════════════════════
-function goto(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick')?.includes("'" + page + "'")) n.classList.add('active');
-  });
-  document.getElementById('main-scroll').scrollTo(0, 0);
-  if (page === 'monthly') renderCal();
-  if (page === 'weekly') renderWeekly();
-  if (page === 'habits') renderHabits();
-  if (page === 'friends') renderFriends();
-  if (page === 'dashboard') updateDash();
+// ═══════════════════════════════════════════
+let curPage='dashboard';
+function goto(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes("'"+p+"'")) n.classList.add('active'); });
+  curPage=p;
+  document.getElementById('main').scrollTo(0,0);
+  if(p==='monthly') renderCal();
+  if(p==='weekly') renderWeekly();
+  if(p==='habits') renderHabits();
+  if(p==='friends') renderFriends();
+  if(p==='dashboard') updateDash();
 }
 
-function setBnav(el) {
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  // close more menu
-  document.getElementById('bnav-more').classList.remove('open');
+function setbn(p){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('bn-'+p);
+  if(el) el.classList.add('active');
+  else document.getElementById('bn-more').classList.add('active');
 }
 
-function toggleMore() {
-  document.getElementById('bnav-more').classList.toggle('open');
+function toggleMore(){
+  document.getElementById('more-drawer').classList.toggle('open');
+  document.getElementById('drawer-overlay').classList.toggle('open');
+}
+function closeMore(){
+  document.getElementById('more-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
 }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DASHBOARD
-// ════════════════════════════════════════════════════════════
-function updateDash() {
-  document.getElementById('stat-c').textContent = state.commitments.filter(c=>c.title).length;
-  document.getElementById('stat-t').textContent = state.brainTasks.length;
-  document.getElementById('stat-d').textContent =
-    [...state.brainTasks,...state.todayTasks].filter(t=>t.done).length;
+// ═══════════════════════════════════════════
+function updateDash(){
+  document.getElementById('sc').textContent=state.commitments.filter(c=>c.title).length;
+  document.getElementById('st').textContent=state.brainTasks.length;
+  document.getElementById('sd').textContent=[...state.brainTasks,...state.todayTasks].filter(t=>t.done).length;
 }
-function quickAdd() {
-  const inp = document.getElementById('quick-inp');
-  const v = inp.value.trim(); if (!v) return;
-  state.brainTasks.push({text:v,done:false,id:Date.now()});
-  inp.value = '';
-  scheduleSave(); renderBrain(); updateDash();
+function quickAdd(){
+  const i=document.getElementById('qi');const v=i.value.trim();if(!v)return;
+  state.brainTasks.push({text:v,done:false,id:Date.now()});i.value='';
+  scheduleSave();renderBrain();updateDash();toast('✓ Aufgabe hinzugefügt');
 }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // COMMITMENTS
-// ════════════════════════════════════════════════════════════
-function renderCommitments() {
-  const g = document.getElementById('commitment-grid'); g.innerHTML = '';
-  state.commitments.forEach((c,i) => {
-    const d = document.createElement('div'); d.className = 'commitment-card';
-    d.innerHTML = `
-      <div class="c-num">#${i+1}</div>
-      <div style="margin-top:12px">
-        <div class="field-row"><span class="field-label">I will</span><input class="field-input" placeholder="your commitment…" value="${esc(c.title||'')}" oninput="state.commitments[${i}].title=this.value;scheduleSave()"></div>
-        <div class="field-row"><span class="field-label">Beginning</span><input class="field-input" type="date" value="${esc(c.start||'')}" oninput="state.commitments[${i}].start=this.value;scheduleSave()"></div>
-        <div class="field-row"><span class="field-label">To succeed</span><input class="field-input" placeholder="what you'll need…" value="${esc(c.succeed||'')}" oninput="state.commitments[${i}].succeed=this.value;scheduleSave()"></div>
-        <div class="field-row"><span class="field-label">This helps</span><input class="field-input" placeholder="the why…" value="${esc(c.why||'')}" oninput="state.commitments[${i}].why=this.value;scheduleSave()"></div>
-      </div>
-      <button onclick="state.commitments.splice(${i},1);scheduleSave();renderCommitments()" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#ddd;font-size:18px">×</button>`;
+// ═══════════════════════════════════════════
+function renderCommits(){
+  const g=document.getElementById('commit-grid');g.innerHTML='';
+  state.commitments.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='commit-card';
+    d.innerHTML=`<div class="c-num">#${i+1}</div>
+    <div style="margin-top:14px">
+      <div class="field-row"><span class="fl">Ich werde</span><input class="fi" placeholder="dein Commitment…" value="${esc(c.title||'')}" oninput="state.commitments[${i}].title=this.value;scheduleSave()"></div>
+      <div class="field-row"><span class="fl">Ab</span><input class="fi" type="date" value="${esc(c.start||'')}" oninput="state.commitments[${i}].start=this.value;scheduleSave()"></div>
+      <div class="field-row"><span class="fl">Ich brauche</span><input class="fi" placeholder="was du benötigst…" value="${esc(c.succeed||'')}" oninput="state.commitments[${i}].succeed=this.value;scheduleSave()"></div>
+      <div class="field-row"><span class="fl">Das hilft mir</span><input class="fi" placeholder="das Warum…" value="${esc(c.why||'')}" oninput="state.commitments[${i}].why=this.value;scheduleSave()"></div>
+    </div>
+    <button onclick="state.commitments.splice(${i},1);scheduleSave();renderCommits()" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#ccc;font-size:20px">×</button>`;
     g.appendChild(d);
   });
 }
-function addCommitment() { state.commitments.push({title:'',start:'',succeed:'',why:''}); scheduleSave(); renderCommitments(); }
+function addCommit(){ state.commitments.push({title:'',start:'',succeed:'',why:''}); scheduleSave(); renderCommits(); }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // BRAIN DUMP
-// ════════════════════════════════════════════════════════════
-function renderBrain() {
-  const l = document.getElementById('brain-list'); l.innerHTML = '';
-  state.brainTasks.forEach((t,i) => {
-    const li = document.createElement('li'); li.className = 'task-item';
-    li.innerHTML = `<input type="checkbox" ${t.done?'checked':''} onchange="state.brainTasks[${i}].done=this.checked;scheduleSave();renderBrain()">
-      <input class="task-text ${t.done?'done':''}" value="${esc(t.text)}" placeholder="Task…" oninput="state.brainTasks[${i}].text=this.value;scheduleSave()">
+// ═══════════════════════════════════════════
+function renderBrain(){
+  const l=document.getElementById('brain-list');l.innerHTML='';
+  state.brainTasks.forEach((t,i)=>{
+    const li=document.createElement('li');li.className='task-item';
+    li.innerHTML=`<input type="checkbox" ${t.done?'checked':''} onchange="state.brainTasks[${i}].done=this.checked;scheduleSave();renderBrain()">
+      <input class="task-text ${t.done?'done':''}" value="${esc(t.text)}" placeholder="Aufgabe…" oninput="state.brainTasks[${i}].text=this.value;scheduleSave()">
       <button class="del-btn" onclick="state.brainTasks.splice(${i},1);scheduleSave();renderBrain()">×</button>`;
     l.appendChild(li);
   });
 }
-function addBrain(text='') {
-  state.brainTasks.push({text,done:false,id:Date.now()}); scheduleSave(); renderBrain();
-  const items = document.querySelectorAll('#brain-list .task-text');
+function addBrain(txt=''){
+  state.brainTasks.push({text:txt,done:false,id:Date.now()});scheduleSave();renderBrain();
+  const items=document.querySelectorAll('#brain-list .task-text');
   if(items.length) items[items.length-1].focus();
 }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // PRIORITY LISTS
-// ════════════════════════════════════════════════════════════
-function renderPri(listId, key) {
-  const l = document.getElementById(listId); l.innerHTML = '';
-  state[key].forEach((t,i) => {
-    const li = document.createElement('li'); li.className = 'task-item';
-    li.innerHTML = `<input type="checkbox" ${t.done?'checked':''} onchange="state['${key}'][${i}].done=this.checked;scheduleSave();renderPri('${listId}','${key}')">
-      <input class="task-text ${t.done?'done':''}" value="${esc(t.text)}" placeholder="Task…" oninput="state['${key}'][${i}].text=this.value;scheduleSave()">
-      <button class="del-btn" onclick="state['${key}'].splice(${i},1);scheduleSave();renderPri('${listId}','${key}')">×</button>`;
+// ═══════════════════════════════════════════
+function renderPri(lid,key){
+  const l=document.getElementById(lid);l.innerHTML='';
+  state[key].forEach((t,i)=>{
+    const li=document.createElement('li');li.className='task-item';
+    li.innerHTML=`<input type="checkbox" ${t.done?'checked':''} onchange="state['${key}'][${i}].done=this.checked;scheduleSave();renderPri('${lid}','${key}')">
+      <input class="task-text ${t.done?'done':''}" value="${esc(t.text)}" placeholder="Aufgabe…" oninput="state['${key}'][${i}].text=this.value;scheduleSave()">
+      <button class="del-btn" onclick="state['${key}'].splice(${i},1);scheduleSave();renderPri('${lid}','${key}')">×</button>`;
     l.appendChild(li);
   });
 }
-const priMap = {today:['list-today','todayTasks'],soon:['list-soon','soonTasks'],eventually:['list-eventually','eventuallyTasks']};
-function addPri(p) {
-  const [lid,key] = priMap[p];
-  state[key].push({text:'',done:false}); scheduleSave(); renderPri(lid,key);
-}
+const PM={today:['l-today','todayTasks'],soon:['l-soon','soonTasks'],eventually:['l-eventually','eventuallyTasks']};
+function addPri(p){ const[l,k]=PM[p]; state[k].push({text:'',done:false}); scheduleSave(); renderPri(l,k); }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // CALENDAR
-// ════════════════════════════════════════════════════════════
-const DNAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-function renderCal() {
-  const m = parseInt(document.getElementById('cal-month').value);
-  const y = parseInt(document.getElementById('cal-year').value);
-  const g = document.getElementById('cal-grid'); g.innerHTML = '';
-  DNAMES.forEach(d => { const h=document.createElement('div'); h.className='cal-header'; h.textContent=d; g.appendChild(h); });
-  const firstDay = new Date(y,m,1).getDay();
-  const days = new Date(y,m+1,0).getDate();
-  const today = new Date();
-  for(let i=0;i<firstDay;i++){ const e=document.createElement('div'); e.className='cal-day empty'; g.appendChild(e); }
+// ═══════════════════════════════════════════
+const DN=['So','Mo','Di','Mi','Do','Fr','Sa'];
+function renderCal(){
+  const m=parseInt(document.getElementById('cm').value);
+  const y=parseInt(document.getElementById('cy').value);
+  const g=document.getElementById('cal-grid');g.innerHTML='';
+  DN.forEach(d=>{const h=document.createElement('div');h.className='cal-hdr';h.textContent=d;g.appendChild(h);});
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const now=new Date();
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='cal-day empty';g.appendChild(e);}
   for(let d=1;d<=days;d++){
-    const isToday = (today.getFullYear()===y && today.getMonth()===m && today.getDate()===d);
-    const cell=document.createElement('div'); cell.className='cal-day'+(isToday?' today-day':'');
+    const isTd=(now.getFullYear()===y&&now.getMonth()===m&&now.getDate()===d);
+    const cell=document.createElement('div');cell.className='cal-day'+(isTd?' td':'');
     const key=`${y}-${m}-${d}`;
     cell.innerHTML=`<span class="day-num">${d}</span>`;
-    const ta=document.createElement('textarea'); ta.className='day-note'; ta.rows=2;
-    ta.value=state.calNotes[key]||''; ta.placeholder='…';
-    ta.oninput=function(){ state.calNotes[key]=this.value; scheduleSave(); };
-    cell.appendChild(ta); g.appendChild(cell);
+    const ta=document.createElement('textarea');ta.className='day-note';ta.rows=2;
+    ta.value=state.calNotes[key]||'';ta.placeholder='…';
+    ta.oninput=function(){state.calNotes[key]=this.value;scheduleSave();};
+    cell.appendChild(ta);g.appendChild(cell);
   }
 }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // WEEKLY
-// ════════════════════════════════════════════════════════════
-const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const HOURS=[];
-for(let h=6;h<=21;h++) HOURS.push(h+':00');
+// ═══════════════════════════════════════════
+const WD=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const HRS=[];for(let h=6;h<=21;h++) HRS.push(h+':00');
 
-function getWeekStart(off) {
-  const d=new Date(); const day=d.getDay();
-  const diff=d.getDate()-day+(day===0?-6:1);
-  d.setDate(diff+off*7); d.setHours(0,0,0,0); return d;
+function getWeekStart(off){
+  const d=new Date(),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);
+  d.setDate(diff+off*7);d.setHours(0,0,0,0);return d;
 }
-function renderWeekly() {
+function renderWeekly(){
   const off=state.weekOffset||0;
-  const ws=getWeekStart(off); const we=new Date(ws); we.setDate(we.getDate()+6);
-  const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  document.getElementById('week-label').textContent=`${fmt(ws)} – ${fmt(we)}`;
-  const g=document.getElementById('week-grid'); g.innerHTML='';
-  const th=document.createElement('div'); th.className='week-col-header time-col'; th.textContent='Time'; g.appendChild(th);
-  WDAYS.forEach((dn,i)=>{ const date=new Date(ws); date.setDate(date.getDate()+i);
-    const h=document.createElement('div'); h.className='week-col-header'; h.textContent=dn+' '+date.getDate(); g.appendChild(h); });
-  HOURS.forEach(hour=>{
-    const tc=document.createElement('div'); tc.className='week-time-cell'; tc.textContent=hour; g.appendChild(tc);
-    WDAYS.forEach((_,i)=>{ const date=new Date(ws); date.setDate(date.getDate()+i);
+  const ws=getWeekStart(off);const we=new Date(ws);we.setDate(we.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('de-DE',{day:'numeric',month:'short'});
+  document.getElementById('wlabel').textContent=`${fmt(ws)} – ${fmt(we)}`;
+  const g=document.getElementById('week-grid');g.innerHTML='';
+  const th=document.createElement('div');th.className='wh tc';th.textContent='Zeit';g.appendChild(th);
+  WD.forEach((dn,i)=>{const date=new Date(ws);date.setDate(date.getDate()+i);
+    const h=document.createElement('div');h.className='wh';h.textContent=dn+' '+date.getDate();g.appendChild(h);});
+  HRS.forEach(hour=>{
+    const tc=document.createElement('div');tc.className='wt';tc.textContent=hour;g.appendChild(tc);
+    WD.forEach((_,i)=>{const date=new Date(ws);date.setDate(date.getDate()+i);
       const key=`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${hour}`;
-      const cell=document.createElement('div'); cell.className='week-cell';
-      const ta=document.createElement('textarea'); ta.value=state.weekNotes[key]||'';
-      ta.oninput=function(){ state.weekNotes[key]=this.value; scheduleSave(); };
-      cell.appendChild(ta); g.appendChild(cell); });
+      const cell=document.createElement('div');cell.className='wc';
+      const ta=document.createElement('textarea');ta.value=state.weekNotes[key]||'';
+      ta.oninput=function(){state.weekNotes[key]=this.value;scheduleSave();};
+      cell.appendChild(ta);g.appendChild(cell);});
   });
 }
-function changeWeek(d){ state.weekOffset=(state.weekOffset||0)+d; scheduleSave(); renderWeekly(); }
+function chWeek(d){state.weekOffset=(state.weekOffset||0)+d;scheduleSave();renderWeekly();}
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // HABITS
-// ════════════════════════════════════════════════════════════
-function renderHabits() {
-  const head=document.getElementById('habit-head'); head.innerHTML='<th style="text-align:left;padding-left:4px">Habit</th>';
-  for(let d=1;d<=31;d++){ const th=document.createElement('th'); th.textContent=d; head.appendChild(th); }
-  const th2=document.createElement('th'); th2.textContent=''; head.appendChild(th2);
-  const body=document.getElementById('habit-body'); body.innerHTML='';
+// ═══════════════════════════════════════════
+function renderHabits(){
+  const head=document.getElementById('h-head');
+  head.innerHTML='<th style="text-align:left;padding-left:4px;min-width:130px">Gewohnheit</th>';
+  for(let d=1;d<=31;d++){const th=document.createElement('th');th.textContent=d;head.appendChild(th);}
+  head.appendChild(document.createElement('th'));
+  const body=document.getElementById('h-body');body.innerHTML='';
   state.habits.forEach((h,hi)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><input class="habit-name-input" value="${esc(h.name||'')}" placeholder="Habit…" oninput="state.habits[${hi}].name=this.value;scheduleSave()"></td>`;
+    tr.innerHTML=`<td><input class="h-name" value="${esc(h.name||'')}" placeholder="Gewohnheit…" oninput="state.habits[${hi}].name=this.value;scheduleSave()"></td>`;
     for(let d=0;d<31;d++){
-      const td=document.createElement('td'); td.style.textAlign='center';
-      const box=document.createElement('div'); box.className='habit-check'+(h.days&&h.days[d]?' on':'');
+      const td=document.createElement('td');td.style.textAlign='center';
+      const box=document.createElement('div');box.className='hbox'+(h.days&&h.days[d]?' on':'');
       box.textContent=h.days&&h.days[d]?'✓':'';
       box.onclick=function(){
-        if(!state.habits[hi].days) state.habits[hi].days={};
+        if(!state.habits[hi].days)state.habits[hi].days={};
         state.habits[hi].days[d]=!state.habits[hi].days[d];
-        scheduleSave();
-        box.classList.toggle('on',!!state.habits[hi].days[d]);
+        scheduleSave();box.classList.toggle('on',!!state.habits[hi].days[d]);
         box.textContent=state.habits[hi].days[d]?'✓':'';
-      }; td.appendChild(box); tr.appendChild(td);
+      };td.appendChild(box);tr.appendChild(td);
     }
     const del=document.createElement('td');
-    del.innerHTML=`<button onclick="state.habits.splice(${hi},1);scheduleSave();renderHabits()" style="background:none;border:none;cursor:pointer;color:#ddd;font-size:16px">×</button>`;
-    tr.appendChild(del); body.appendChild(tr);
+    del.innerHTML=`<button onclick="state.habits.splice(${hi},1);scheduleSave();renderHabits()" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;padding:4px">×</button>`;
+    tr.appendChild(del);body.appendChild(tr);
   });
 }
-function addHabit(){ state.habits.push({name:'',days:{}}); scheduleSave(); renderHabits(); }
+function addHabit(){state.habits.push({name:'',days:{}});scheduleSave();renderHabits();}
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // FRIEND FILES
-// ════════════════════════════════════════════════════════════
-const FOLDERS=['Basic Info','Important Dates','Interests/Hobbies','Good Times','Hard Times','Other Notes'];
-function renderFriends() {
-  const tabs=document.getElementById('friend-tabs'); tabs.innerHTML='';
+// ═══════════════════════════════════════════
+const FLDS=['Grundinfos','Wichtige Daten','Interessen & Hobbys','Gute Zeiten','Schwierige Zeiten','Sonstige Notizen'];
+function renderFriends(){
+  const tabs=document.getElementById('f-tabs');tabs.innerHTML='';
   const ci=state.currentFriend||0;
   state.friends.forEach((f,i)=>{
-    const t=document.createElement('div'); t.className='friend-tab'+(i===ci?' active':'');
+    const t=document.createElement('div');t.className='f-tab'+(i===ci?' active':'');
     t.textContent=f.name||'Person '+(i+1);
-    t.onclick=()=>{ state.currentFriend=i; scheduleSave(); renderFriends(); };
+    t.onclick=()=>{state.currentFriend=i;scheduleSave();renderFriends();};
     tabs.appendChild(t);
   });
-  const cnt=document.getElementById('friend-content');
-  if(!state.friends.length){ cnt.innerHTML='<p style="color:var(--muted);font-size:14px">No friends yet. Click + Add Person.</p>'; return; }
+  const cnt=document.getElementById('f-content');
+  if(!state.friends.length){cnt.innerHTML='<p style="color:var(--muted);font-size:14px">Noch keine Person. Klick + Person.</p>';return;}
   const f=state.friends[ci];
   cnt.innerHTML=`
     <div class="card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-        <span class="field-label">NAME:</span>
-        <input class="field-input" style="font-size:15px;font-weight:600" value="${esc(f.name||'')}" placeholder="Name…" oninput="state.friends[${ci}].name=this.value;scheduleSave();renderFriends()">
-        <button onclick="state.friends.splice(${ci},1);state.currentFriend=Math.max(0,${ci}-1);scheduleSave();renderFriends()" style="margin-left:auto;background:none;border:none;color:#ddd;cursor:pointer;font-size:14px">× Remove</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <span class="fl">NAME:</span>
+        <input class="fi" style="font-size:15px;font-weight:600" value="${esc(f.name||'')}" placeholder="Name…" oninput="state.friends[${ci}].name=this.value;scheduleSave();renderFriends()">
+        <button onclick="state.friends.splice(${ci},1);state.currentFriend=Math.max(0,${ci}-1);scheduleSave();renderFriends()" style="margin-left:auto;background:none;border:none;color:#ccc;cursor:pointer;font-size:14px">× Entfernen</button>
       </div>
-      <div class="friend-folder-grid">
-        ${FOLDERS.map((fl,fi)=>`
-          <div class="folder-card">
-            <div class="folder-tab-top">${fl}</div>
-            <div class="folder-body"><textarea placeholder="${fl} notes…" oninput="if(!state.friends[${ci}].folders)state.friends[${ci}].folders={};state.friends[${ci}].folders[${fi}]=this.value;scheduleSave()">${esc((f.folders||{})[fi]||'')}</textarea></div>
+      <div class="folder-grid">
+        ${FLDS.map((fl,fi)=>`
+          <div class="folder">
+            <div class="folder-top">${fl}</div>
+            <div class="folder-body"><textarea placeholder="${fl}…" oninput="if(!state.friends[${ci}].folders)state.friends[${ci}].folders={};state.friends[${ci}].folders[${fi}]=this.value;scheduleSave()">${esc((f.folders||{})[fi]||'')}</textarea></div>
           </div>`).join('')}
       </div>
       <div style="margin-top:10px">
-        <div class="card-title">Questions to Ask</div>
-        <textarea class="notes-editor" style="min-height:70px;font-size:13px" placeholder="Questions, things to find out…" oninput="state.friends[${ci}].questions=this.value;scheduleSave()">${esc(f.questions||'')}</textarea>
+        <div class="card-title">Fragen zum Stellen</div>
+        <textarea class="notes-ta" style="min-height:70px;font-size:13px" placeholder="Fragen, Dinge die ich herausfinden möchte…" oninput="state.friends[${ci}].questions=this.value;scheduleSave()">${esc(f.questions||'')}</textarea>
       </div>
     </div>`;
 }
-function addFriend(){ state.friends.push({name:'',folders:{},questions:''}); state.currentFriend=state.friends.length-1; scheduleSave(); renderFriends(); }
+function addFriend(){state.friends.push({name:'',folders:{},questions:''});state.currentFriend=state.friends.length-1;scheduleSave();renderFriends();}
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // UTILS
-// ════════════════════════════════════════════════════════════
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function showToast(msg) {
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+// ═══════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);}
 
-function rerenderAll() {
-  renderCommitments(); renderBrain();
-  renderPri('list-today','todayTasks'); renderPri('list-soon','soonTasks'); renderPri('list-eventually','eventuallyTasks');
+function rerenderAll(){
+  renderCommits();renderBrain();
+  renderPri('l-today','todayTasks');renderPri('l-soon','soonTasks');renderPri('l-eventually','eventuallyTasks');
   updateDash();
   document.getElementById('free-notes').value=state.freeNotes||'';
-  const now=new Date();
-  document.getElementById('cal-month').value=now.getMonth();
-  document.getElementById('cal-year').value=now.getFullYear();
 }
 
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // INIT
-// ════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 localLoad();
 rerenderAll();
 
-// Free notes
-const notesEl=document.getElementById('free-notes');
-notesEl.value=state.freeNotes||'';
-notesEl.oninput=function(){ state.freeNotes=this.value; scheduleSave(); };
+document.getElementById('free-notes').oninput=function(){state.freeNotes=this.value;scheduleSave();};
 
-// Init Google after GIS script loads
-window.addEventListener('load', () => {
-  if(window.google) initGoogleAuth();
-});
+const now=new Date();
+document.getElementById('cm').value=now.getMonth();
+document.getElementById('cy').value=now.getFullYear();
 
-// Show sync modal on first visit if not yet connected
+// Show sync modal on first visit
 setTimeout(()=>{
-  if(!accessToken && !localStorage.getItem('dsp-skipped')) showSyncModal();
-},1200);
-document.querySelector('.skip-btn').addEventListener('click',()=>{ localStorage.setItem('dsp-skipped','1'); });
+  if(!accessToken&&!localStorage.getItem('dsp-skip')){showSyncModal();}
+},1000);
+document.querySelector('.skip').addEventListener('click',()=>{localStorage.setItem('dsp-skip','1');});
 
-// Auto-sync every 5 minutes if connected
-setInterval(()=>{ if(accessToken && driveFileId) saveToDrive(); }, 5*60*1000);
+// Sync every 5 min
+setInterval(()=>{if(accessToken&&fileId)saveToDrive();},5*60*1000);
+
+window.addEventListener('load',()=>{if(window.google)initGIS();});
 </script>
-
-<!-- Google Identity Services — loads after page is ready -->
-<script src="https://accounts.google.com/gsi/client" async defer onload="if(typeof initGoogleAuth==='function')initGoogleAuth()"></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGIS()"></script>
 </body>
 </html>
